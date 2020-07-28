@@ -1,7 +1,7 @@
 use super::models::Request;
-use crate::errors::{KrakenError, KrakenErrorResponse, KrakenResponse};
+use crate::errors::KrakenError;
 use base64::{decode as b64decode, encode as b64encode};
-use chrono::Utc;
+use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 use failure::Fail;
 use fehler::{throw, throws};
@@ -11,7 +11,7 @@ use reqwest::{Client, Response};
 use ring::digest::{digest, SHA256};
 use ring::hmac;
 use serde::de::DeserializeOwned;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{from_str, to_string as to_jstring, to_value};
 use serde_urlencoded::to_string as to_ustring;
 use std::str;
@@ -20,35 +20,35 @@ use url::Url;
 const REST_URL: &'static str = "https://futures.kraken.com/derivatives/api/v3";
 
 #[derive(Clone, Builder)]
-pub struct Kraken {
+pub struct KrakenRest {
     client: Client,
     #[builder(default)]
     credential: Option<(String, String)>,
 }
 
-impl Default for Kraken {
+impl Default for KrakenRest {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Kraken {
+impl KrakenRest {
     pub fn new() -> Self {
-        Kraken {
+        KrakenRest {
             client: Client::new(),
             credential: None,
         }
     }
 
     pub fn with_credential(api_key: &str, api_secret: &str) -> Self {
-        Kraken {
+        KrakenRest {
             client: Client::new(),
             credential: Some((api_key.into(), api_secret.into())),
         }
     }
 
-    pub fn builder() -> KrakenBuilder {
-        KrakenBuilder::default()
+    pub fn builder() -> KrakenRestBuilder {
+        KrakenRestBuilder::default()
     }
 
     #[throws(failure::Error)]
@@ -124,9 +124,9 @@ impl Kraken {
         let status = resp.status();
         let resp = resp.text().await?;
 
-        if let Ok(p) = from_str::<KrakenResponse<T>>(&resp) {
+        if let Ok(p) = from_str::<KrakenRestResponse<T>>(&resp) {
             return p.payload;
-        } else if let Ok(e) = from_str::<KrakenErrorResponse>(&resp) {
+        } else if let Ok(e) = from_str::<KrakenRestErrorResponse>(&resp) {
             throw!(KrakenError::from(e))
         } else {
             throw!(KrakenError::CannotDeserializeResponse(resp))
@@ -171,4 +171,38 @@ fn show(bs: &[u8]) -> String {
         visible.push_str(str::from_utf8(&part).unwrap());
     }
     visible
+}
+
+impl From<KrakenRestErrorResponse> for KrakenError {
+    fn from(error: KrakenRestErrorResponse) -> KrakenError {
+        KrakenError::KrakenError(error.error)
+    }
+}
+
+#[derive(Deserialize, Debug, Clone)]
+pub(crate) struct KrakenRestResponse<T> {
+    result: Success,
+    #[serde(rename = "serverTime")]
+    pub(crate) server_time: DateTime<Utc>,
+    #[serde(flatten)]
+    pub(crate) payload: T,
+}
+
+// The error response from bitmex;
+#[derive(Deserialize, Debug, Clone)]
+pub(crate) struct KrakenRestErrorResponse {
+    result: Error,
+    pub(crate) error: String,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+enum Error {
+    #[serde(rename = "error")]
+    Error,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+enum Success {
+    #[serde(rename = "success")]
+    Success,
 }

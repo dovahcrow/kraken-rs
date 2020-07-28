@@ -1,11 +1,15 @@
 mod accounts;
+mod cancel_all_orders;
 mod cancel_order;
 mod orderbook;
+mod send_order;
 mod tickers;
 
 pub use accounts::{AccountsRequest, AccountsResponse};
-pub use cancel_order::{CancelOrderRequest, CancelOrderResponse, CancelStatus, Order, OrderEvent, Status};
+pub use cancel_all_orders::{CancelAllOrderRequest, CancelAllOrderResponse, CancelledOrder};
+pub use cancel_order::{CancelOrderRequest, CancelOrderResponse, CancelStatus, Status};
 pub use orderbook::{OrderbookRequest, OrderbookResponse};
+pub use send_order::{SendOrderRequest, SendOrderResponse, SendStatus};
 pub use tickers::{TickersRequest, TickersResponse};
 
 use http::Method;

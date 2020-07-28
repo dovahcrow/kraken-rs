@@ -1,5 +1,6 @@
 mod client;
-pub mod command;
+mod command;
 pub mod message;
 
 pub use client::KrakenWebsocket;
+pub use command::Command;

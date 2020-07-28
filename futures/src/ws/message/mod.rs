@@ -1,16 +1,11 @@
 mod constants;
 
-use crate::Symbol;
+use crate::common::{Side, Symbol};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::{from_value, to_value, Value};
 use std::collections::HashMap;
-
-// Text("{\"success\":true,\"subscribe\":\"chat\",\"request\":{\"args\":[\"chat\"],\"op\":\"subscribe\"}}")
-// Text("{\"table\":\"chat\",\"action\":\"insert\",\"keys\":[\"id\"],\"data\":[{\"channelID\":4,\"date\":\"2018-10-26T05:09:44.159Z\",\"fromBot\":false,\"html\":\"ㅋㅋㅋㅋㅋ ETF 드립 ㅈㄴ웃기네\\n\",\"id\":21699228,\"message\":\"ㅋㅋㅋㅋㅋ ETF 드립 ㅈㄴ웃기네\",\"user\":\"xixixiaqs\"}],\"filterKey\":\"channelID\"}")
-// Text("{\"info\":\"Welcome to the BitMEX Realtime API.\",\"version\":\"2018-10-23T18:33:47.000Z\",\"timestamp\":\"2018-10-26T05:09:14.006Z\",\"docs\":\"https://www.bitmex.com/app/wsAPI\",\"limit\":{\"remaining\":38}}")
-// {"success":true,"unsubscribe":"chat","request":{"op":"unsubscribe","args":["chat"]}}
-// {"status":400,"error":"Failed to decode incoming data: Unexpected token a in JSON at position 0. Please see the documentation at https://www.bitmex.com/app/wsAPI.","meta":{}}
+use uuid::Uuid;
 
 #[derive(Deserialize)]
 #[serde(untagged)]
@@ -39,9 +34,32 @@ pub enum Message {
 #[derive(Deserialize, Debug, Clone)]
 #[serde(untagged)]
 pub enum SubscriptionMessage {
-    BookSnapshot(BookSnapshot),
+    AccountBalance(AccountBalance),
     Book(Book),
+    BookSnapshot(BookSnapshot),
+    Fills(Fills),
     FillsSnapshot(FillsSnapshot),
+    Heartbeat(Heartbeat),
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct AccountBalance {
+    pub seq: i64,
+    feed: constants::AccountBalancesAndMargins,
+    pub margin_accounts: Vec<MarginAccount>,
+    pub account: String,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct MarginAccount {
+    name: String,
+    pv: f64,
+    balance: f64,
+    funding: f64,
+    mm: f64,
+    pnl: f64,
+    im: f64,
+    am: f64,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -76,11 +94,39 @@ pub struct Book {
     feed: constants::Book,
     pub product_id: Symbol,
     pub timestamp: i64,
+    pub side: Side,
     pub seq: i64,
     #[serde(rename = "tickSize")]
     pub tick_size: Option<serde_json::Value>,
     pub price: f64,
     pub qty: f64,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct Fills {
+    feed: constants::Fills,
+    pub username: String,
+    pub fills: Vec<SingleFill>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct SingleFill {
+    pub instrument: Symbol,
+    pub time: i64,
+    pub price: i64,
+    pub seq: i64,
+    pub buy: bool,
+    pub qty: i64,
+    pub order_id: Uuid,
+    pub cli_ord_id: Uuid,
+    pub fill_id: Uuid,
+    pub fill_type: String,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct Heartbeat {
+    feed: constants::Heartbeat,
+    time: i64,
 }
 
 // impl<'de> Deserialize<'de> for Message {

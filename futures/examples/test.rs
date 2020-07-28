@@ -1,10 +1,12 @@
+#![allow(unused_imports)]
+
 use dotenv::dotenv;
 use env_logger::init;
 use failure::Error;
 use fehler::throws;
 use futures::{SinkExt, StreamExt};
 use kraken_futures::rest::{Kraken, TickersRequest};
-use kraken_futures::ws::{command, message, KrakenWebsocket};
+use kraken_futures::ws::{message, Command, KrakenWebsocket};
 use kraken_futures::Symbol;
 use serde_json::from_str;
 use structopt::StructOpt;
@@ -34,8 +36,8 @@ async fn main() -> Result<(), Error> {
 
     let mut ws = KrakenWebsocket::with_credential(&opt.kraken_api_key, &opt.kraken_api_secret).await?;
 
-    ws.send(command::PublicWSCommand::book(&["PI_XBTUSD"])?).await?;
-    ws.send(command::PublicWSCommand::challenge(&opt.kraken_api_key)).await?;
+    ws.send(Command::book(&["PI_XBTUSD"])?).await?;
+    ws.send(Command::challenge(&opt.kraken_api_key)).await?;
     let mut challenge = None;
 
     while let Some(Ok(e)) = ws.next().await {
@@ -52,7 +54,7 @@ async fn main() -> Result<(), Error> {
         }
     }
 
-    ws.send((command::PrivateWSCommand::fills(), &challenge.unwrap())).await?;
+    ws.send((Command::fills(), &challenge.unwrap())).await?;
 
     while let Some(Ok(e)) = ws.next().await {
         match e {
@@ -60,6 +62,7 @@ async fn main() -> Result<(), Error> {
                 message::SubscriptionMessage::BookSnapshot(b) => println!("Subscription {:?}", b),
                 message::SubscriptionMessage::Book(b) => println!("Subscription {:?}", b),
                 message::SubscriptionMessage::FillsSnapshot(b) => println!("Subscription {:?}", b),
+                _ => {}
             },
             message::Message::Info { .. } => {}
             message::Message::Subscribed { feed, .. } => println!("Subscribed to {}", feed),
