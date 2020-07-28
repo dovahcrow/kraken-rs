@@ -45,6 +45,15 @@ pub enum OrderEvent {
     },
 }
 
+impl OrderEvent {
+    pub fn order_id(&self) -> Uuid {
+        match self {
+            OrderEvent::Execution { order_prior_execution, .. } => order_prior_execution.order_id,
+            OrderEvent::NewOrder { order, .. } => order.order_id,
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum OrderType {
     // lmt for a limit order
