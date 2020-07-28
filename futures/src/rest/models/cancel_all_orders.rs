@@ -1,5 +1,5 @@
 use super::Request;
-use crate::common::{Order, OrderEvent, Side, Status, Symbol};
+use crate::common::{constants, Either, Order, OrderEvent, Side, Symbol};
 use chrono::{DateTime, Utc};
 use http::Method;
 use serde::{Deserialize, Serialize};
@@ -31,10 +31,17 @@ pub struct CancelAllOrderResponse {
 #[serde(rename_all = "camelCase")]
 pub struct CancelStatus {
     pub received_time: DateTime<Utc>,
-    pub cancel_only: String,
-    pub status: Status,
+    pub cancel_only: Either<Symbol, constants::All>,
+    pub status: CancelAllStatus,
     pub cancelled_orders: Vec<CancelledOrder>,
     pub order_events: Vec<OrderEvent>,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
+pub enum CancelAllStatus {
+    Cancelled,
+    NoOrdersToCancel,
 }
 
 #[derive(Debug, Deserialize, Clone)]

@@ -12,7 +12,7 @@ use serde_json::from_str;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt, Clone)]
-#[structopt(name = "HoneyDeer", about = "The HoneyDeer.")]
+#[structopt(name = "kraken-rs", about = "kraken-rs.")]
 struct Opt {
     #[structopt(env)]
     kraken_api_key: String,

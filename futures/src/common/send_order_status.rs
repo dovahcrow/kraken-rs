@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug, Clone, Copy)]
 #[serde(rename_all = "camelCase")]
-pub enum Status {
+pub enum SendOrderStatus {
     // placed: the order was placed successfully
     Placed,
     // cancelled: the order was cancelled successfully

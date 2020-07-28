@@ -1,5 +1,5 @@
 use super::Request;
-use crate::common::{Order, OrderEvent, OrderType, Pair, Side, Status, Symbol, TriggerSignal};
+use crate::common::{Order, OrderEvent, OrderType, Pair, SendOrderStatus, Side, Symbol, TriggerSignal};
 use chrono::{DateTime, Utc};
 use http::Method;
 use serde::{Deserialize, Serialize};
@@ -48,14 +48,14 @@ pub struct SendOrderResponse {
 pub enum SendStatus {
     Success {
         order_id: Uuid,
-        status: Status,
+        status: SendOrderStatus,
         #[serde(rename = "receivedTime")]
         received_time: DateTime<Utc>,
         #[serde(rename = "orderEvents")]
         order_events: Vec<OrderEvent>,
     },
     Fail {
-        status: Status,
+        status: SendOrderStatus,
     },
 }
 
@@ -67,7 +67,7 @@ impl SendStatus {
         }
     }
 
-    pub fn status(&self) -> Status {
+    pub fn status(&self) -> SendOrderStatus {
         match self {
             SendStatus::Success { status, .. } => *status,
             SendStatus::Fail { status } => *status,

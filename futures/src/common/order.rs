@@ -1,6 +1,7 @@
 use super::{Side, Symbol};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use uuid::Uuid;
 
 #[derive(Debug, Deserialize, Clone)]
@@ -21,11 +22,21 @@ pub struct Order {
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct OrderEvent {
-    pub uid: Option<Uuid>,
-    pub order: Order,
-    pub reason: Option<String>,
-    pub r#type: String,
+#[serde(untagged)]
+pub enum OrderEvent {
+    #[serde(rename_all = "camelCase")]
+    Execution {
+        execution_id: Uuid,
+        price: f64,
+        amount: f64,
+        order_prior_edit: Option<Value>,
+        order_prior_execution: Order,
+    },
+    NewOrder {
+        order: Order,
+        reason: Option<String>,
+        r#type: String,
+    },
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

@@ -13,7 +13,7 @@ use std::collections::BTreeMap;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt, Clone)]
-#[structopt(name = "HoneyDeer", about = "The HoneyDeer.")]
+#[structopt(name = "kraken-rs", about = "kraken-rs.")]
 struct Opt {
     #[structopt(env)]
     kraken_api_key: String,
@@ -30,7 +30,7 @@ async fn main() -> Result<(), Error> {
 
     let client = KrakenRest::with_credential(&opt.kraken_api_key, &opt.kraken_api_secret);
 
-    let resp = client.request(SendOrderRequest::limit(Symbol::PerpetualInverse("XBTUSD".parse()?), 1000., 1)).await?;
+    let resp = client.request(SendOrderRequest::limit(Symbol::PerpetualInverse("XBTUSD".parse()?), 1., 1)).await?;
     println!("{:?}", resp);
 
     let resp = client.request(CancelAllOrderRequest::all()).await?;

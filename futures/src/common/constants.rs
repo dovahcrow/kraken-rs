@@ -1,6 +1,12 @@
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug, Clone, Copy)]
+pub enum All {
+    #[serde(rename = "all")]
+    All,
+}
+
+#[derive(Deserialize, Debug, Clone, Copy)]
 pub enum AccountBalancesAndMargins {
     #[serde(rename = "account_balances_and_margins")]
     AccountBalancesAndMargins,
