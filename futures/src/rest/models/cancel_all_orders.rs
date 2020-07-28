@@ -7,11 +7,11 @@ use std::collections::HashMap;
 use uuid::Uuid;
 
 #[derive(Serialize, Debug, Clone)]
-pub struct CancelAllOrderRequest {
+pub struct CancelAllOrdersRequest {
     symbol: Option<Symbol>,
 }
 
-impl CancelAllOrderRequest {
+impl CancelAllOrdersRequest {
     pub fn all() -> Self {
         Self { symbol: None }
     }
@@ -23,7 +23,7 @@ impl CancelAllOrderRequest {
 
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
-pub struct CancelAllOrderResponse {
+pub struct CancelAllOrdersResponse {
     cancel_status: CancelStatus,
 }
 
@@ -50,10 +50,10 @@ pub struct CancelledOrder {
     pub order_id: Uuid,
 }
 
-impl Request for CancelAllOrderRequest {
+impl Request for CancelAllOrdersRequest {
     const METHOD: Method = Method::POST;
     const SIGNED: bool = true;
     const ENDPOINT: &'static str = "/cancelallorders";
     const HAS_PAYLOAD: bool = true;
-    type Response = CancelAllOrderResponse;
+    type Response = CancelAllOrdersResponse;
 }

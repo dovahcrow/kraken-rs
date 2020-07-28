@@ -55,8 +55,8 @@ async fn main() -> Result<(), Error> {
                     seq, margin_accounts, account, ..
                 }) => {
                     println!("SEQ: current: {}, received: {}", _seq, seq);
-                    assert!(seq >= _seq);
-                    _seq = seq;
+                    assert!(seq as i64 >= _seq);
+                    _seq = seq as i64;
 
                     println!("[{}]: {:?}", account, margin_accounts);
                 }

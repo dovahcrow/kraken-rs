@@ -5,7 +5,7 @@ use env_logger::init;
 use failure::Error;
 use fehler::throws;
 use futures::{SinkExt, StreamExt};
-use kraken_futures::rest::{CancelAllOrdersRequest, CancelOrderRequest, KrakenRest, SendOrderRequest};
+use kraken_futures::rest::{KrakenRest, OpenPositionsRequest};
 use kraken_futures::ws::{message, Command, KrakenWebsocket};
 use kraken_futures::{Side, Symbol};
 use serde_json::from_str;
@@ -30,13 +30,7 @@ async fn main() -> Result<(), Error> {
 
     let client = KrakenRest::with_credential(&opt.kraken_api_key, &opt.kraken_api_secret);
 
-    let resp = client.request(SendOrderRequest::limit(Symbol::PerpetualInverse("XBTUSD".parse()?), 10000., -1)).await?;
-    println!("{:?}", resp);
-
-    let resp = client.request(SendOrderRequest::limit(Symbol::PerpetualInverse("XBTUSD".parse()?), 10000., -1)).await?;
-    println!("{:?}", resp);
-
-    let resp = client.request(CancelOrderRequest::from_order_id(resp.send_status.order_id().unwrap())).await?;
+    let resp = client.request(OpenPositionsRequest).await?;
     println!("{:?}", resp);
 
     Ok(())

@@ -21,6 +21,12 @@ pub struct Order {
     pub last_update_timestamp: Option<DateTime<Utc>>,
 }
 
+impl PartialEq for Order {
+    fn eq(&self, other: &Order) -> bool {
+        self.order_id == other.order_id
+    }
+}
+
 #[derive(Debug, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum OrderEvent {
@@ -29,7 +35,7 @@ pub enum OrderEvent {
         execution_id: Uuid,
         price: f64,
         amount: f64,
-        order_prior_edit: Option<Value>,
+        order_prior_edit: Option<Order>,
         order_prior_execution: Order,
     },
     NewOrder {

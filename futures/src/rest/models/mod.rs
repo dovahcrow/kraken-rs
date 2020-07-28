@@ -1,13 +1,15 @@
 mod accounts;
 mod cancel_all_orders;
 mod cancel_order;
+mod open_positions;
 mod orderbook;
 mod send_order;
 mod tickers;
 
 pub use accounts::{AccountsRequest, AccountsResponse};
-pub use cancel_all_orders::{CancelAllOrderRequest, CancelAllOrderResponse, CancelledOrder};
+pub use cancel_all_orders::{CancelAllOrdersRequest, CancelAllOrdersResponse, CancelledOrder};
 pub use cancel_order::{CancelOrderRequest, CancelOrderResponse, CancelStatus, Status};
+pub use open_positions::{OpenPosition, OpenPositionsRequest, OpenPositionsResponse};
 pub use orderbook::{OrderbookRequest, OrderbookResponse};
 pub use send_order::{SendOrderRequest, SendOrderResponse, SendStatus};
 pub use tickers::{TickersRequest, TickersResponse};

@@ -5,7 +5,7 @@ use env_logger::init;
 use failure::Error;
 use fehler::throws;
 use futures::{SinkExt, StreamExt};
-use kraken_futures::rest::{Kraken, TickersRequest};
+use kraken_futures::rest::{KrakenRest, TickersRequest};
 use kraken_futures::ws::{message, Command, KrakenWebsocket};
 use kraken_futures::Symbol;
 use serde_json::from_str;
@@ -37,7 +37,7 @@ async fn main() -> Result<(), Error> {
     let mut ws = KrakenWebsocket::with_credential(&opt.kraken_api_key, &opt.kraken_api_secret).await?;
 
     ws.send(Command::book(&["PI_XBTUSD"])?).await?;
-    ws.send(Command::challenge(&opt.kraken_api_key)).await?;
+    ws.send(Command::challenge()).await?;
     let mut challenge = None;
 
     while let Some(Ok(e)) = ws.next().await {
