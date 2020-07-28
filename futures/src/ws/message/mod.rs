@@ -1,6 +1,6 @@
 mod constants;
 
-use crate::common::{Side, Symbol};
+use crate::common::{FillType, Side, Symbol};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::{from_value, to_value, Value};
@@ -44,7 +44,7 @@ pub enum SubscriptionMessage {
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct AccountBalance {
-    pub seq: i64,
+    pub seq: u64,
     feed: constants::AccountBalancesAndMargins,
     pub margin_accounts: Vec<MarginAccount>,
     pub account: String,
@@ -63,18 +63,11 @@ pub struct MarginAccount {
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct FillsSnapshot {
-    feed: constants::FillsSnapshot,
-    pub account: String,
-    pub fills: Vec<Value>,
-}
-
-#[derive(Debug, Deserialize, Clone)]
 pub struct BookSnapshot {
     feed: constants::BookSnapshot,
     pub product_id: Symbol,
     pub timestamp: i64,
-    pub seq: i64,
+    pub seq: u64,
     #[serde(rename = "tickSize")]
     pub tick_size: Option<serde_json::Value>,
     #[serde(default)]
@@ -95,7 +88,7 @@ pub struct Book {
     pub product_id: Symbol,
     pub timestamp: i64,
     pub side: Side,
-    pub seq: i64,
+    pub seq: u64,
     #[serde(rename = "tickSize")]
     pub tick_size: Option<serde_json::Value>,
     pub price: f64,
@@ -110,23 +103,30 @@ pub struct Fills {
 }
 
 #[derive(Debug, Deserialize, Clone)]
+pub struct FillsSnapshot {
+    feed: constants::FillsSnapshot,
+    pub account: String,
+    pub fills: Vec<SingleFill>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
 pub struct SingleFill {
     pub instrument: Symbol,
-    pub time: i64,
-    pub price: i64,
-    pub seq: i64,
+    pub time: u64,
+    pub price: f64,
+    pub seq: u64,
     pub buy: bool,
-    pub qty: i64,
+    pub qty: f64,
     pub order_id: Uuid,
-    pub cli_ord_id: Uuid,
+    pub cli_ord_id: Option<Uuid>,
     pub fill_id: Uuid,
-    pub fill_type: String,
+    pub fill_type: FillType,
 }
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Heartbeat {
     feed: constants::Heartbeat,
-    time: i64,
+    time: u64,
 }
 
 // impl<'de> Deserialize<'de> for Message {

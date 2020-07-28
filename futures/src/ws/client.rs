@@ -12,7 +12,7 @@ use pin_project::pin_project;
 use ring::digest::{digest, SHA256};
 use ring::hmac;
 use serde::Serialize;
-use serde_json::{from_str, to_string};
+use serde_json::{from_str, json, to_string};
 use std::pin::Pin;
 use tokio::net::TcpStream;
 use tokio_tungstenite::{connect_async, MaybeTlsStream, WebSocketStream};
@@ -24,9 +24,7 @@ const WS_URL: &'static str = "wss://futures.kraken.com/ws/v1";
 #[allow(dead_code)]
 type WSStream = WebSocketStream<MaybeTlsStream<TcpStream>>;
 
-#[pin_project]
 pub struct KrakenWebsocket {
-    #[pin]
     inner: WSStream,
     credential: Option<(String, String)>,
 }
@@ -78,26 +76,34 @@ impl KrakenWebsocket {
 impl Sink<Command> for KrakenWebsocket {
     type Error = failure::Error;
 
-    fn poll_ready(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<(), Self::Error>> {
-        let this = self.project();
-        this.inner.poll_ready(cx).map_err(|e| e.into())
+    fn poll_ready(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<(), Self::Error>> {
+        let inner = Pin::new(&mut self.inner);
+        inner.poll_ready(cx).map_err(|e| e.into())
     }
 
-    fn start_send(self: Pin<&mut Self>, item: Command) -> Result<(), Self::Error> {
-        let this = self.project();
-        let command = to_string(&item)?;
+    fn start_send(mut self: Pin<&mut Self>, item: Command) -> Result<(), Self::Error> {
+        let key = self.check_key()?.0.to_string();
+        let inner = Pin::new(&mut self.inner);
+        let command = match item {
+            Command::Challenge => to_string(&json!({
+               "event": "challenge",
+               "api_key": key,
+            }))?,
+            item => to_string(&item)?,
+        };
+
         trace!("Sending '{}' through websocket", command);
-        Ok(this.inner.start_send(WSMessage::Text(command))?)
+        Ok(inner.start_send(WSMessage::Text(command))?)
     }
 
-    fn poll_flush(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<(), Self::Error>> {
-        let this = self.project();
-        this.inner.poll_flush(cx).map_err(|e| e.into())
+    fn poll_flush(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<(), Self::Error>> {
+        let inner = Pin::new(&mut self.inner);
+        inner.poll_flush(cx).map_err(|e| e.into())
     }
 
-    fn poll_close(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<(), Self::Error>> {
-        let this = self.project();
-        this.inner.poll_close(cx).map_err(|e| e.into())
+    fn poll_close(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<(), Self::Error>> {
+        let inner = Pin::new(&mut self.inner);
+        inner.poll_close(cx).map_err(|e| e.into())
     }
 }
 
@@ -117,11 +123,11 @@ impl<U: AsRef<str>> Sink<(Command, U)> for KrakenWebsocket {
         <Self as Sink<Command>>::poll_ready(self, cx)
     }
 
-    fn start_send(self: Pin<&mut Self>, (command, challenge): (Command, U)) -> Result<(), Self::Error> {
+    fn start_send(mut self: Pin<&mut Self>, (command, challenge): (Command, U)) -> Result<(), Self::Error> {
         let (api_key, sig) = self.signature(challenge.as_ref())?;
         let api_key = api_key.to_string();
 
-        let this = self.project();
+        let inner = Pin::new(&mut self.inner);
 
         let command = ExtendedPrivateCommand {
             command,
@@ -131,7 +137,7 @@ impl<U: AsRef<str>> Sink<(Command, U)> for KrakenWebsocket {
         };
         let command = to_string(&command)?;
         trace!("Sending '{}' through websocket", command);
-        Ok(this.inner.start_send(WSMessage::Text(command))?)
+        Ok(inner.start_send(WSMessage::Text(command))?)
     }
 
     fn poll_flush(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<(), Self::Error>> {
@@ -146,9 +152,9 @@ impl<U: AsRef<str>> Sink<(Command, U)> for KrakenWebsocket {
 impl Stream for KrakenWebsocket {
     type Item = Fallible<KrakenWsMessage>;
 
-    fn poll_next(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
-        let this = self.project();
-        let poll = this.inner.poll_next(cx);
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
+        let inner = Pin::new(&mut self.inner);
+        let poll = inner.poll_next(cx);
         match poll {
             Poll::Ready(Some(Err(e))) => Poll::Ready(Some(Err(e.into()))),
             Poll::Ready(Some(Ok(m))) => match parse_message(m) {
@@ -167,7 +173,7 @@ fn parse_message(msg: WSMessage) -> KrakenWsMessage {
         WSMessage::Text(message) => match message.as_str() {
             others => match from_str(others) {
                 Ok(r) => r,
-                Err(_) => unreachable!("Cannot deserialize message from Kraken: '{}'", others),
+                Err(e) => unreachable!("Cannot deserialize message '{}' from Kraken: {}", others, e),
             },
         },
         WSMessage::Close(_) => throw!(KrakenError::WebsocketClosed),

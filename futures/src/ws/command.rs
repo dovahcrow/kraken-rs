@@ -7,7 +7,7 @@ use url::Url;
 pub enum Command {
     AccountBalance,
     Book { product_ids: Vec<Symbol> },
-    Challenge { key: String },
+    Challenge,
     Fills,
     Heartbeat,
     Trade { product_ids: Vec<Symbol> },
@@ -25,8 +25,8 @@ impl Command {
         }
     }
 
-    pub fn challenge(key: &str) -> Self {
-        Self::Challenge { key: key.into() }
+    pub fn challenge() -> Self {
+        Self::Challenge
     }
 
     pub fn fills() -> Self {
@@ -60,9 +60,8 @@ impl Serialize for Command {
                "feed": "book",
                "product_ids": product_ids
             }),
-            Self::Challenge { key } => json!({
+            Self::Challenge => json!({
                "event": "challenge",
-               "api_key": key,
             }),
             Self::Fills => json!({
                 "event":"subscribe",

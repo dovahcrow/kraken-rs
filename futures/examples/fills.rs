@@ -30,6 +30,7 @@ async fn main() -> Result<(), Error> {
     let mut ws = KrakenWebsocket::with_credential(&opt.kraken_api_key, &opt.kraken_api_secret).await?;
 
     ws.send(Command::challenge()).await?;
+
     let mut challenge = None;
     while let Some(Ok(e)) = ws.next().await {
         match e {
@@ -43,22 +44,16 @@ async fn main() -> Result<(), Error> {
         }
     }
 
-    ws.send(Command::heartbeat()).await?;
-    ws.send((Command::account_balance(), challenge.unwrap())).await?;
-
-    let mut _seq = -1;
+    ws.send((Command::fills(), challenge.unwrap())).await?;
 
     while let Some(Ok(e)) = ws.next().await {
         match e {
             message::Message::Subscription(x) => match x {
-                message::SubscriptionMessage::AccountBalance(message::AccountBalance {
-                    seq, margin_accounts, account, ..
-                }) => {
-                    println!("SEQ: current: {}, received: {}", _seq, seq);
-                    assert!(seq >= _seq);
-                    _seq = seq;
-
-                    println!("[{}]: {:?}", account, margin_accounts);
+                message::SubscriptionMessage::Fills(message::Fills { username, fills, .. }) => {
+                    println!("[Fill {}]: {:?}", username, fills);
+                }
+                message::SubscriptionMessage::FillsSnapshot(message::FillsSnapshot { account, fills, .. }) => {
+                    println!("[Snapshot {}]: {:?}", account, fills);
                 }
                 message::SubscriptionMessage::Heartbeat(_) => {
                     println!("Heartbeat");

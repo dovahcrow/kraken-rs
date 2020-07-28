@@ -7,7 +7,7 @@ pub struct GetServerTimeRequest;
 
 #[derive(Deserialize, Debug, Clone)]
 pub struct GetServerTimeResponse {
-    pub unixtime: i64,
+    pub unixtime: u64,
     #[serde(deserialize_with = "deserialize")]
     pub rfc1123: DateTime<Utc>,
 }
