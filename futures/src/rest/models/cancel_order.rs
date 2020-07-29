@@ -38,11 +38,11 @@ pub struct CancelOrderResponse {
 #[derive(Debug, Deserialize, Clone)]
 pub struct CancelStatus {
     pub status: Status,
-    #[serde(rename = "orderEvents")]
+    #[serde(rename = "orderEvents", default)]
     pub order_events: Vec<OrderEvent>,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub enum Status {
     Cancelled,

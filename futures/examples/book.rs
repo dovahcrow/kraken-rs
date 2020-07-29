@@ -30,7 +30,7 @@ async fn main() -> Result<(), Error> {
 
     let mut ws = KrakenWebsocket::with_credential(&opt.kraken_api_key, &opt.kraken_api_secret).await?;
 
-    ws.send(Command::book(&["PI_XBTUSD"])?).await?;
+    ws.send(Command::book(&["PI_XBTUSD".parse()?])).await?;
 
     let mut _seq = 0;
     let mut book = Book::new();

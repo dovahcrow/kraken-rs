@@ -89,6 +89,8 @@ impl Sink<Command> for KrakenWebsocket {
                "event": "challenge",
                "api_key": key,
             }))?,
+            Command::Ping => return Ok(inner.start_send(WSMessage::Ping(vec![]))?),
+            Command::Pong => return Ok(inner.start_send(WSMessage::Pong(vec![]))?),
             item => to_string(&item)?,
         };
 

@@ -5,7 +5,7 @@ use serde_json::{from_value, to_value, Value};
 use std::collections::HashMap;
 use uuid::Uuid;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug, Clone)]
 #[serde(untagged)]
 pub enum Message {
     Subscribed {
@@ -50,14 +50,14 @@ pub struct AccountBalance {
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct MarginAccount {
-    name: String,
-    pv: f64,
-    balance: f64,
-    funding: f64,
-    mm: f64,
-    pnl: f64,
-    im: f64,
-    am: f64,
+    pub name: String,
+    pub pv: f64,
+    pub balance: f64,
+    pub funding: f64,
+    pub mm: f64,
+    pub pnl: f64,
+    pub im: f64,
+    pub am: f64,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -124,7 +124,7 @@ pub struct SingleFill {
 #[derive(Debug, Deserialize, Clone)]
 pub struct Heartbeat {
     feed: constants::Heartbeat,
-    time: u64,
+    pub time: u64,
 }
 
 // impl<'de> Deserialize<'de> for Message {

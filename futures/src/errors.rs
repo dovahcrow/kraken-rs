@@ -16,4 +16,6 @@ pub enum KrakenError {
     ParsePairFailed(String),
     #[fail(display = "Failed to parse symbol {}", _0)]
     ParseSymbolFailed(String),
+    #[fail(display = "Failed to parse currency {}", _0)]
+    ParseCurrencyFailed(String),
 }

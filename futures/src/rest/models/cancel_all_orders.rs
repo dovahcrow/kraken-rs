@@ -16,8 +16,8 @@ impl CancelAllOrdersRequest {
         Self { symbol: None }
     }
 
-    pub fn by_symbol(symbol: &Symbol) -> Self {
-        Self { symbol: Some(symbol.clone()) }
+    pub fn by_symbol(symbol: Symbol) -> Self {
+        Self { symbol: Some(symbol) }
     }
 }
 

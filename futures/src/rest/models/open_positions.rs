@@ -18,12 +18,12 @@ pub struct OpenPositionsResponse {
 #[derive(Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct OpenPosition {
-    side: PositionSide,
-    symbol: Symbol,
-    price: f64,
-    fill_time: DateTime<Utc>,
-    size: f64,
-    unrealized_funding: Option<f64>,
+    pub side: PositionSide,
+    pub symbol: Symbol,
+    pub price: f64,
+    pub fill_time: DateTime<Utc>,
+    pub size: f64,
+    pub unrealized_funding: Option<f64>,
 }
 
 impl Request for OpenPositionsRequest {

@@ -1,6 +1,6 @@
 use crate::Symbol;
-use fehler::throws;
-use serde::{Deserialize, Serialize, Serializer};
+use fehler::{throw, throws};
+use serde::{ser, Deserialize, Serialize, Serializer};
 use serde_json::json;
 use url::Url;
 
@@ -11,6 +11,8 @@ pub enum Command {
     Fills,
     Heartbeat,
     Trade { product_ids: Vec<Symbol> },
+    Ping,
+    Pong,
 }
 
 impl Command {
@@ -18,11 +20,8 @@ impl Command {
         Self::AccountBalance
     }
 
-    #[throws(failure::Error)]
-    pub fn book(product_ids: &[&str]) -> Self {
-        Self::Book {
-            product_ids: product_ids.iter().map(|s| s.parse()).collect::<Result<Vec<_>, _>>()?,
-        }
+    pub fn book(product_ids: &[Symbol]) -> Self {
+        Self::Book { product_ids: product_ids.into() }
     }
 
     pub fn challenge() -> Self {
@@ -60,9 +59,7 @@ impl Serialize for Command {
                "feed": "book",
                "product_ids": product_ids
             }),
-            Self::Challenge => json!({
-               "event": "challenge",
-            }),
+            Self::Challenge => throw!(ser::Error::custom("Cannot serialize challenge to Kraken Websocket Message")),
             Self::Fills => json!({
                 "event":"subscribe",
                 "feed": "fills",
@@ -76,6 +73,8 @@ impl Serialize for Command {
                "feed": "trade",
                "product_ids": product_ids
             }),
+            Self::Ping => throw!(ser::Error::custom("Cannot serialize Ping to Kraken Websocket Message")),
+            Self::Pong => throw!(ser::Error::custom("Cannot serialize Pong to Kraken Websocket Message")),
         };
 
         v.serialize(serializer)

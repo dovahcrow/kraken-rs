@@ -9,15 +9,15 @@ use uuid::Uuid;
 #[derive(Serialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct SendOrderRequest {
-    order_type: OrderType,
-    symbol: Symbol,
-    side: Side,
-    size: u64,
-    limit_price: f64,
-    stop_price: Option<f64>,
-    trigger_signal: Option<TriggerSignal>,
-    cli_ord_id: Option<Uuid>,
-    reduce_only: Option<bool>,
+    pub order_type: OrderType,
+    pub symbol: Symbol,
+    pub side: Side,
+    pub size: u64,
+    pub limit_price: f64,
+    pub stop_price: Option<f64>,
+    pub trigger_signal: Option<TriggerSignal>,
+    pub cli_ord_id: Option<Uuid>,
+    pub reduce_only: Option<bool>,
 }
 
 impl SendOrderRequest {
