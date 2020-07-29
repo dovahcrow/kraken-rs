@@ -1,8 +1,6 @@
 use super::Request;
-use crate::Symbol;
 use http::Method;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 #[derive(Serialize, Debug, Clone)]
 pub struct TickersRequest;

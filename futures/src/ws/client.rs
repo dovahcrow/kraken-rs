@@ -8,7 +8,6 @@ use futures::sink::Sink;
 use futures::stream::Stream;
 use futures::task::{Context, Poll};
 use log::trace;
-use pin_project::pin_project;
 use ring::digest::{digest, SHA256};
 use ring::hmac;
 use serde::Serialize;
@@ -31,15 +30,24 @@ pub struct KrakenWebsocket {
 
 impl KrakenWebsocket {
     #[throws(failure::Error)]
-    pub async fn new() -> Self {
-        let (stream, _) = connect_async(Url::parse(&WS_URL).unwrap()).await?;
+    pub async fn new<'a, T>(url: T) -> Self
+    where
+        T: Into<Option<&'a str>>,
+    {
+        let url = url.into().unwrap_or(&WS_URL);
+
+        let (stream, _) = connect_async(Url::parse(url).unwrap()).await?;
 
         Self { inner: stream, credential: None }
     }
 
     #[throws(failure::Error)]
-    pub async fn with_credential(api_key: &str, api_secret: &str) -> Self {
-        let (stream, _) = connect_async(Url::parse(&WS_URL).unwrap()).await?;
+    pub async fn with_credential<'a, T>(url: T, api_key: &str, api_secret: &str) -> Self
+    where
+        T: Into<Option<&'a str>>,
+    {
+        let url = url.into().unwrap_or(&WS_URL);
+        let (stream, _) = connect_async(Url::parse(&url).unwrap()).await?;
 
         Self {
             inner: stream,

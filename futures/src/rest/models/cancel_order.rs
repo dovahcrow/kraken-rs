@@ -1,9 +1,7 @@
 use super::Request;
-use crate::common::{Order, OrderEvent, Side, Symbol};
-use chrono::{DateTime, Utc};
+use crate::common::OrderEvent;
 use http::Method;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use uuid::Uuid;
 
 #[derive(Serialize, Debug, Clone)]

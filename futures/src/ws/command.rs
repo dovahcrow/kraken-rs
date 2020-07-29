@@ -1,8 +1,7 @@
 use crate::Symbol;
 use fehler::{throw, throws};
-use serde::{ser, Deserialize, Serialize, Serializer};
+use serde::{ser, Serialize, Serializer};
 use serde_json::json;
-use url::Url;
 
 pub enum Command {
     AccountBalance,

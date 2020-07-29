@@ -1,6 +1,5 @@
 use super::Request;
-use crate::{Side, Symbol};
-use chrono::{DateTime, Utc};
+use crate::Symbol;
 use http::Method;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;

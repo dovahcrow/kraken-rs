@@ -2,11 +2,8 @@ use super::models::Request;
 use crate::errors::KrakenError;
 use base64::{decode as b64decode, encode as b64encode};
 use chrono::{DateTime, Utc};
-use derive_builder::Builder;
-use failure::Fail;
 use fehler::{throw, throws};
 use http::Method;
-use log::error;
 use reqwest::{Client, Response};
 use ring::digest::{digest, SHA256};
 use ring::hmac;
@@ -19,36 +16,34 @@ use url::Url;
 
 const REST_URL: &'static str = "https://futures.kraken.com/derivatives/api/v3";
 
-#[derive(Clone, Builder)]
+#[derive(Clone)]
 pub struct KrakenRest {
+    url: String,
     client: Client,
-    #[builder(default)]
     credential: Option<(String, String)>,
 }
 
-impl Default for KrakenRest {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl KrakenRest {
-    pub fn new() -> Self {
+    pub fn new<'a, T>(url: T) -> Self
+    where
+        T: Into<Option<&'a str>>,
+    {
         KrakenRest {
+            url: url.into().unwrap_or(REST_URL).into(),
             client: Client::new(),
             credential: None,
         }
     }
 
-    pub fn with_credential(api_key: &str, api_secret: &str) -> Self {
+    pub fn with_credential<'a, T>(url: T, api_key: &str, api_secret: &str) -> Self
+    where
+        T: Into<Option<&'a str>>,
+    {
         KrakenRest {
+            url: url.into().unwrap_or(REST_URL).into(),
             client: Client::new(),
             credential: Some((api_key.into(), api_secret.into())),
         }
-    }
-
-    pub fn builder() -> KrakenRestBuilder {
-        KrakenRestBuilder::default()
     }
 
     #[throws(failure::Error)]
@@ -119,13 +114,11 @@ impl KrakenRest {
         (key, signature)
     }
 
-    #[throws(failure::Error)]
-    async fn handle_response<T: DeserializeOwned>(&self, resp: Response) -> T {
-        let status = resp.status();
+    async fn handle_response<T: DeserializeOwned>(&self, resp: Response) -> Result<T, failure::Error> {
         let resp = resp.text().await?;
 
         if let Ok(p) = from_str::<KrakenRestResponse<T>>(&resp) {
-            return p.payload;
+            return Ok(p.payload);
         } else if let Ok(e) = from_str::<KrakenRestErrorResponse>(&resp) {
             throw!(KrakenError::from(e))
         } else {
@@ -162,16 +155,6 @@ trait ToUrlQuery: Serialize {
 }
 
 impl<S: Serialize> ToUrlQuery for S {}
-
-fn show(bs: &[u8]) -> String {
-    use std::ascii::escape_default;
-    let mut visible = String::new();
-    for &b in bs {
-        let part: Vec<u8> = escape_default(b).collect();
-        visible.push_str(str::from_utf8(&part).unwrap());
-    }
-    visible
-}
 
 impl From<KrakenRestErrorResponse> for KrakenError {
     fn from(error: KrakenRestErrorResponse) -> KrakenError {

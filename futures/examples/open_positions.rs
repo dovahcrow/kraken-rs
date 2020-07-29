@@ -28,7 +28,7 @@ async fn main() -> Result<(), Error> {
 
     let opt = Opt::from_args();
 
-    let client = KrakenRest::with_credential(&opt.kraken_api_key, &opt.kraken_api_secret);
+    let client = KrakenRest::with_credential(None, &opt.kraken_api_key, &opt.kraken_api_secret);
 
     let resp = client.request(OpenPositionsRequest).await?;
     println!("{:?}", resp);

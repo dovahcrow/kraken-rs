@@ -1,5 +1,3 @@
-#![allow(unused)]
-
 mod common;
 pub mod errors;
 pub mod rest;

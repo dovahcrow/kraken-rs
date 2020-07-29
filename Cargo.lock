@@ -697,7 +697,6 @@ version = "0.1.0"
 dependencies = [
  "base64 0.12.3",
  "chrono",
- "derive_builder",
  "dotenv",
  "env_logger",
  "failure",
@@ -707,7 +706,6 @@ dependencies = [
  "http",
  "lazy_static",
  "log",
- "pin-project",
  "regex",
  "reqwest",
  "ring",
