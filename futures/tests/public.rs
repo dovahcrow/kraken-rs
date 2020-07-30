@@ -11,7 +11,7 @@ fn test_orderbook() {
 
     let mut rt = Runtime::new()?;
 
-    let client = KrakenRest::new();
+    let client = KrakenRest::new(None);
     rt.block_on(client.request(OrderbookRequest { symbol: "PI_XBTUSD".parse()? }))?;
 }
 
@@ -23,7 +23,7 @@ fn test_tickers() {
 
     let mut rt = Runtime::new()?;
 
-    let client = KrakenRest::new();
+    let client = KrakenRest::new(None);
 
     rt.block_on(client.request(TickersRequest))?;
 }

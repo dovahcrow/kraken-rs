@@ -6,7 +6,7 @@ mod orderbook;
 mod send_order;
 mod tickers;
 
-pub use accounts::{AccountsRequest, AccountsResponse};
+pub use accounts::{AccountDetail, AccountsRequest, AccountsResponse, Auxiliary, MarginRequirements};
 pub use cancel_all_orders::{CancelAllOrdersRequest, CancelAllOrdersResponse, CancelledOrder};
 pub use cancel_order::{CancelOrderRequest, CancelOrderResponse, CancelStatus, Status};
 pub use open_positions::{OpenPosition, OpenPositionsRequest, OpenPositionsResponse};

@@ -26,7 +26,7 @@ fn test_account() {
 
     let mut rt = Runtime::new()?;
 
-    let client = KrakenRest::with_credential(&opt.kraken_api_key, &opt.kraken_api_secret);
+    let client = KrakenRest::with_credential(None, &opt.kraken_api_key, &opt.kraken_api_secret);
 
     rt.block_on(client.request(AccountsRequest))?;
 }
@@ -41,7 +41,7 @@ fn test_open_positions() {
 
     let mut rt = Runtime::new()?;
 
-    let client = KrakenRest::with_credential(&opt.kraken_api_key, &opt.kraken_api_secret);
+    let client = KrakenRest::with_credential(None, &opt.kraken_api_key, &opt.kraken_api_secret);
 
     rt.block_on(client.request(OpenPositionsRequest))?;
 }
@@ -56,7 +56,7 @@ fn test_buy_and_cancel() {
 
     let mut rt = Runtime::new()?;
 
-    let client = KrakenRest::with_credential(&opt.kraken_api_key, &opt.kraken_api_secret);
+    let client = KrakenRest::with_credential(None, &opt.kraken_api_key, &opt.kraken_api_secret);
 
     let resp = rt.block_on(client.request(SendOrderRequest::limit(Symbol::PerpetualInverse("XBTUSD".parse()?), 30000., -1)))?;
 

@@ -24,6 +24,12 @@ pub enum BookSnapshot {
     BookSnapshot,
 }
 
+#[derive(Deserialize, Debug, Clone)]
+pub enum CashAccount {
+    #[serde(rename = "cashAccount")]
+    CashAccount,
+}
+
 #[derive(Deserialize, Debug, Clone, Copy)]
 pub enum Challenge {
     #[serde(rename = "challenge")]
@@ -52,6 +58,12 @@ pub enum Heartbeat {
 pub enum Info {
     #[serde(rename = "info")]
     Info,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+pub enum MarginAccount {
+    #[serde(rename = "marginAccount")]
+    MarginAccount,
 }
 
 #[derive(Deserialize, Debug, Clone, Copy)]

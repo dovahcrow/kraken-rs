@@ -34,7 +34,7 @@ async fn main() -> Result<(), Error> {
     // let sym: Symbol = "fi_xbtusd".parse()?;
     // println!("aaa {:?}", sym);
 
-    let mut ws = KrakenWebsocket::with_credential(&opt.kraken_api_key, &opt.kraken_api_secret).await?;
+    let mut ws = KrakenWebsocket::with_credential(None, &opt.kraken_api_key, &opt.kraken_api_secret).await?;
 
     ws.send(Command::book(&["PI_XBTUSD".parse()?])).await?;
     ws.send(Command::challenge()).await?;

@@ -7,11 +7,17 @@ use std::str::FromStr;
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Debug, Hash, Deserialize, Serialize)]
 pub enum Currency {
+    #[serde(alias = "xbt")]
     XBT,
+    #[serde(alias = "eth")]
     ETH,
+    #[serde(alias = "bch")]
     BCH,
+    #[serde(alias = "xrp")]
     XRP,
+    #[serde(alias = "ltc")]
     LTC,
+    #[serde(alias = "usd")]
     USD,
 }
 

@@ -1,4 +1,5 @@
 use super::Request;
+use crate::common::Symbol;
 use http::Method;
 use serde::{Deserialize, Serialize};
 
@@ -17,7 +18,7 @@ pub struct Ticker {
 
     pub pair: Option<String>,
 
-    pub symbol: String,
+    pub symbol: Symbol,
 
     #[serde(rename = "markPrice")]
     pub mark_price: Option<f64>,
