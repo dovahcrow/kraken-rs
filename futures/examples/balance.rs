@@ -51,16 +51,16 @@ async fn main() -> Result<(), Error> {
     while let Some(Ok(e)) = ws.next().await {
         match e {
             message::Message::Subscription(x) => match x {
-                message::SubscriptionMessage::AccountBalance(message::AccountBalance {
+                message::SubscriptionMessage::AccountBalance {
                     seq, margin_accounts, account, ..
-                }) => {
+                } => {
                     println!("SEQ: current: {}, received: {}", _seq, seq);
                     assert!(seq as i64 >= _seq);
                     _seq = seq as i64;
 
                     println!("[{}]: {:?}", account, margin_accounts);
                 }
-                message::SubscriptionMessage::Heartbeat(_) => {
+                message::SubscriptionMessage::Heartbeat { .. } => {
                     println!("Heartbeat");
                 }
                 _ => unreachable!(),

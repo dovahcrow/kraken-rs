@@ -21,30 +21,48 @@ pub enum Message {
         event: constants::Challenge,
         message: String,
     },
-    Subscription(SubscriptionMessage), // Subscriptions don't have field event
+    Subscription(SubscriptionMessage), // Subscriptions don't have the event field
     Ping,
     Pong,
 }
 
 // Bellow are structs for Subscriptions
-
 #[derive(Deserialize, Debug, Clone)]
-#[serde(untagged)]
+#[serde(tag = "feed", rename_all = "snake_case")]
 pub enum SubscriptionMessage {
-    AccountBalance(AccountBalance),
-    Book(Book),
-    BookSnapshot(BookSnapshot),
-    Fills(Fills),
-    FillsSnapshot(FillsSnapshot),
-    Heartbeat(Heartbeat),
-}
-
-#[derive(Debug, Deserialize, Clone)]
-pub struct AccountBalance {
-    pub seq: u64,
-    feed: constants::AccountBalancesAndMargins,
-    pub margin_accounts: Vec<MarginAccount>,
-    pub account: String,
+    AccountBalance {
+        seq: u64,
+        margin_accounts: Vec<MarginAccount>,
+        account: String,
+    },
+    Book {
+        product_id: Symbol,
+        timestamp: i64,
+        side: Side,
+        seq: u64,
+        price: f64,
+        qty: f64,
+    },
+    BookSnapshot {
+        product_id: Symbol,
+        timestamp: i64,
+        seq: u64,
+        #[serde(default)]
+        bids: Vec<PriceTuple>,
+        #[serde(default)]
+        asks: Vec<PriceTuple>,
+    },
+    Fills {
+        username: String,
+        fills: Vec<SingleFill>,
+    },
+    FillsSnapshot {
+        account: String,
+        fills: Vec<SingleFill>,
+    },
+    Heartbeat {
+        time: u64,
+    },
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -60,50 +78,9 @@ pub struct MarginAccount {
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct BookSnapshot {
-    feed: constants::BookSnapshot,
-    pub product_id: Symbol,
-    pub timestamp: i64,
-    pub seq: u64,
-    #[serde(rename = "tickSize")]
-    pub tick_size: Option<serde_json::Value>,
-    #[serde(default)]
-    pub bids: Vec<PriceTuple>,
-    #[serde(default)]
-    pub asks: Vec<PriceTuple>,
-}
-
-#[derive(Debug, Deserialize, Clone)]
 pub struct PriceTuple {
     pub price: f64,
     pub qty: f64,
-}
-
-#[derive(Debug, Deserialize, Clone)]
-pub struct Book {
-    feed: constants::Book,
-    pub product_id: Symbol,
-    pub timestamp: i64,
-    pub side: Side,
-    pub seq: u64,
-    #[serde(rename = "tickSize")]
-    pub tick_size: Option<serde_json::Value>,
-    pub price: f64,
-    pub qty: f64,
-}
-
-#[derive(Debug, Deserialize, Clone)]
-pub struct Fills {
-    feed: constants::Fills,
-    pub username: String,
-    pub fills: Vec<SingleFill>,
-}
-
-#[derive(Debug, Deserialize, Clone)]
-pub struct FillsSnapshot {
-    feed: constants::FillsSnapshot,
-    pub account: String,
-    pub fills: Vec<SingleFill>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -118,12 +95,6 @@ pub struct SingleFill {
     pub cli_ord_id: Option<Uuid>,
     pub fill_id: Uuid,
     pub fill_type: FillType,
-}
-
-#[derive(Debug, Deserialize, Clone)]
-pub struct Heartbeat {
-    feed: constants::Heartbeat,
-    pub time: u64,
 }
 
 // impl<'de> Deserialize<'de> for Message {

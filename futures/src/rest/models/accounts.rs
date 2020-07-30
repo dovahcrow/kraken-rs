@@ -1,5 +1,5 @@
 use super::Request;
-use crate::common::{constants, Currency, Either, Symbol};
+use crate::common::{Currency, Either, Symbol};
 use http::Method;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -13,15 +13,13 @@ pub struct AccountsResponse {
 }
 
 #[derive(Deserialize, Debug, Clone)]
-#[serde(untagged)]
+#[serde(tag = "type", rename_all = "camelCase")]
 pub enum AccountDetail {
     CashAccount {
-        r#type: constants::CashAccount,
         balances: HashMap<Either<Currency, Symbol>, f64>,
     },
     #[serde(rename_all = "camelCase")]
     MarginAccount {
-        r#type: constants::MarginAccount,
         currency: Currency,
         balances: HashMap<Either<Currency, Symbol>, f64>,
         auxiliary: Auxiliary,

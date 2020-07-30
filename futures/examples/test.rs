@@ -59,9 +59,9 @@ async fn main() -> Result<(), Error> {
     while let Some(Ok(e)) = ws.next().await {
         match e {
             message::Message::Subscription(s) => match s {
-                message::SubscriptionMessage::BookSnapshot(b) => println!("Subscription {:?}", b),
-                message::SubscriptionMessage::Book(b) => println!("Subscription {:?}", b),
-                message::SubscriptionMessage::FillsSnapshot(b) => println!("Subscription {:?}", b),
+                message::SubscriptionMessage::BookSnapshot { .. } => println!("Subscription {:?}", s),
+                message::SubscriptionMessage::Book { .. } => println!("Subscription {:?}", s),
+                message::SubscriptionMessage::FillsSnapshot { .. } => println!("Subscription {:?}", s),
                 _ => {}
             },
             message::Message::Info { .. } => {}

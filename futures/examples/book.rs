@@ -38,21 +38,21 @@ async fn main() -> Result<(), Error> {
     while let Some(Ok(e)) = ws.next().await {
         match e {
             message::Message::Subscription(x) => match x {
-                message::SubscriptionMessage::BookSnapshot(message::BookSnapshot { product_id, seq, bids, asks, .. }) => {
+                message::SubscriptionMessage::BookSnapshot { product_id, seq, bids, asks, .. } => {
                     assert!(matches!(product_id, Symbol::PerpetualInverse(_)));
                     assert!(seq > _seq);
                     _seq = seq;
                     book.add_multiple(Side::Buy, bids);
                     book.add_multiple(Side::Sell, asks);
                 }
-                message::SubscriptionMessage::Book(message::Book {
+                message::SubscriptionMessage::Book {
                     product_id,
                     seq,
                     price,
                     qty,
                     side,
                     ..
-                }) => {
+                } => {
                     assert!(matches!(product_id, Symbol::PerpetualInverse(_)));
                     assert!(seq > _seq);
                     _seq = seq;

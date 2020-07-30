@@ -49,13 +49,13 @@ async fn main() -> Result<(), Error> {
     while let Some(Ok(e)) = ws.next().await {
         match e {
             message::Message::Subscription(x) => match x {
-                message::SubscriptionMessage::Fills(message::Fills { username, fills, .. }) => {
+                message::SubscriptionMessage::Fills { username, fills, .. } => {
                     println!("[Fill {}]: {:?}", username, fills);
                 }
-                message::SubscriptionMessage::FillsSnapshot(message::FillsSnapshot { account, fills, .. }) => {
+                message::SubscriptionMessage::FillsSnapshot { account, fills, .. } => {
                     println!("[Snapshot {}]: {:?}", account, fills);
                 }
-                message::SubscriptionMessage::Heartbeat(_) => {
+                message::SubscriptionMessage::Heartbeat { .. } => {
                     println!("Heartbeat");
                 }
                 _ => unreachable!(),
