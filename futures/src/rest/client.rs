@@ -46,6 +46,22 @@ impl KrakenRest {
         }
     }
 
+    pub async fn request_with_retry_nonce<R>(&self, req: R) -> failure::Fallible<R::Response>
+    where
+        R: Request + Clone,
+        R::Response: DeserializeOwned,
+    {
+        loop {
+            match self.request(req.clone()).await {
+                Ok(o) => return Ok(o),
+                Err(e) => match e.downcast_ref::<KrakenError>() {
+                    Some(KrakenError::KrakenError(content)) if content.starts_with("nonceDuplicate:") => continue,
+                    _ => throw!(e),
+                },
+            };
+        }
+    }
+
     #[throws(failure::Error)]
     pub async fn request<R>(&self, req: R) -> R::Response
     where
@@ -55,7 +71,7 @@ impl KrakenRest {
         let url = format!("{}{}", &*REST_URL, R::ENDPOINT);
         let url = Url::parse(&url)?;
 
-        let nonce = Utc::now().timestamp_millis();
+        let nonce = Utc::now().timestamp_nanos();
 
         let mut query = vec![];
 
