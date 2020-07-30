@@ -1,7 +1,7 @@
 use crate::errors::KrakenError;
 use fehler::{throw, throws};
 use serde::{de::Error as DeError, Deserialize, Deserializer, Serialize, Serializer};
-use serde_json::{from_str, to_string};
+use serde_json::from_str;
 use std::fmt;
 use std::str::FromStr;
 
@@ -43,6 +43,7 @@ impl FromStr for Currency {
         }
     }
 }
+
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Copy)]
 pub enum Symbol {
     Cash,
@@ -78,7 +79,17 @@ impl FromStr for Symbol {
 
 impl std::fmt::Display for Symbol {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", to_string(&self).map_err(|_| fmt::Error)?)
+        match self {
+            Symbol::Cash => write!(f, "CASH"),
+            Symbol::FutureInverse(p, None) => write!(f, "FI_{}", p),
+            Symbol::FutureInverse(p, Some(e)) => write!(f, "FI_{}_{}", p, e),
+            Symbol::FutureVanilla(p, None) => write!(f, "FV_{}", p),
+            Symbol::FutureVanilla(p, Some(e)) => write!(f, "FV_{}_{}", p, e),
+            Symbol::PerpetualInverse(p) => write!(f, "PI_{}", p),
+            Symbol::PerpetualVanilla(p) => write!(f, "PV_{}", p),
+            Symbol::Index(p) => write!(f, "IN_{}", p),
+            Symbol::ReferenceRate(p) => write!(f, "RR_{}", p),
+        }
     }
 }
 
@@ -93,29 +104,7 @@ impl Serialize for Symbol {
     where
         S: Serializer,
     {
-        let repr = match self {
-            Self::Cash => "CASH".to_string(),
-            Self::FutureInverse(pair, expire) => {
-                if let Some(expire) = expire {
-                    format!("FI_{}_{}", pair, expire)
-                } else {
-                    format!("FI_{}", pair)
-                }
-            }
-            Self::FutureVanilla(pair, expire) => {
-                if let Some(expire) = expire {
-                    format!("FV_{}_{}", pair, expire)
-                } else {
-                    format!("FV_{}", pair)
-                }
-            }
-            Self::PerpetualInverse(pair) => format!("PI_{}", pair),
-            Self::PerpetualVanilla(pair) => format!("PV_{}", pair),
-            Self::Index(pair) => format!("IN_{}", pair),
-            Self::ReferenceRate(pair) => format!("RR_{}", pair),
-        };
-
-        serializer.serialize_str(&repr)
+        serializer.serialize_str(&self.to_string())
     }
 }
 
