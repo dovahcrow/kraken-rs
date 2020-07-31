@@ -29,11 +29,13 @@ async fn main() -> Result<(), Error> {
 
     let mut ws = KrakenWebsocket::with_credential(None, &opt.kraken_api_key, &opt.kraken_api_secret).await?;
 
-    ws.send(Command::challenge()).await?;
+    // Reqeust the challenge first. Challenge is required for private feed subscription.
+    ws.send(Command::challenge()).await?; // All available websocket requests are under the Command enum
 
     let mut challenge = None;
     while let Some(Ok(e)) = ws.next().await {
         match e {
+            // The response of the websocket is under the Message enum.
             message::Message::Info { version, .. } => println!("Kraken Version {}", version),
             message::Message::Challenge { message, .. } => {
                 println!("Challenge received {}", message);
@@ -44,10 +46,12 @@ async fn main() -> Result<(), Error> {
         }
     }
 
+    // Subscribe to the private feed by sending a Command along with a challenge.
     ws.send((Command::fills(), challenge.unwrap())).await?;
 
     while let Some(Ok(e)) = ws.next().await {
         match e {
+            // The response of the websocket is under the Message enum.
             message::Message::Subscription(x) => match x {
                 message::SubscriptionMessage::Fills { username, fills, .. } => {
                     println!("[Fill {}]: {:?}", username, fills);

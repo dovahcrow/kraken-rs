@@ -30,13 +30,14 @@ async fn main() -> Result<(), Error> {
 
     let mut ws = KrakenWebsocket::with_credential(None, &opt.kraken_api_key, &opt.kraken_api_secret).await?;
 
-    ws.send(Command::book(&["PI_XBTUSD".parse()?])).await?;
+    ws.send(Command::book(&["PI_XBTUSD".parse()?])).await?; // All available websocket requests are under the Command enum
 
     let mut _seq = 0;
     let mut book = Book::new();
 
     while let Some(Ok(e)) = ws.next().await {
         match e {
+            // The response of the websocket is under the Message enum.
             message::Message::Subscription(x) => match x {
                 message::SubscriptionMessage::BookSnapshot { product_id, seq, bids, asks, .. } => {
                     assert!(matches!(product_id, Symbol::PerpetualInverse(_)));
