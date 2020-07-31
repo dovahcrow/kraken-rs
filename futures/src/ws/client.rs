@@ -2,7 +2,6 @@ use super::command::Command;
 use super::message::Message as KrakenWsMessage;
 use crate::errors::KrakenError;
 use base64::{decode as b64decode, encode as b64encode};
-use failure::Fallible;
 use fehler::{throw, throws};
 use futures::sink::Sink;
 use futures::stream::Stream;
@@ -29,7 +28,7 @@ pub struct KrakenWebsocket {
 }
 
 impl KrakenWebsocket {
-    #[throws(failure::Error)]
+    #[throws(KrakenError)]
     pub async fn new<'a, T>(url: T) -> Self
     where
         T: Into<Option<&'a str>>,
@@ -41,7 +40,7 @@ impl KrakenWebsocket {
         Self { inner: stream, credential: None }
     }
 
-    #[throws(failure::Error)]
+    #[throws(KrakenError)]
     pub async fn with_credential<'a, T>(url: T, api_key: &str, api_secret: &str) -> Self
     where
         T: Into<Option<&'a str>>,
@@ -55,7 +54,7 @@ impl KrakenWebsocket {
         }
     }
 
-    #[throws(failure::Error)]
+    #[throws(KrakenError)]
     fn check_key(&self) -> (&str, &str) {
         match self.credential.as_ref() {
             None => throw!(KrakenError::NoApiKeySet),
@@ -63,7 +62,7 @@ impl KrakenWebsocket {
         }
     }
 
-    #[throws(failure::Error)]
+    #[throws(KrakenError)]
     pub fn signature(&self, challenge: &str) -> (&str, String) {
         let (key, secret) = self.check_key()?;
 
@@ -82,7 +81,7 @@ impl KrakenWebsocket {
 }
 
 impl Sink<Command> for KrakenWebsocket {
-    type Error = failure::Error;
+    type Error = KrakenError;
 
     fn poll_ready(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<(), Self::Error>> {
         let inner = Pin::new(&mut self.inner);
@@ -127,7 +126,7 @@ struct ExtendedPrivateCommand<T> {
 }
 
 impl<U: AsRef<str>> Sink<(Command, U)> for KrakenWebsocket {
-    type Error = failure::Error;
+    type Error = KrakenError;
 
     fn poll_ready(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Result<(), Self::Error>> {
         <Self as Sink<Command>>::poll_ready(self, cx)
@@ -160,7 +159,7 @@ impl<U: AsRef<str>> Sink<(Command, U)> for KrakenWebsocket {
 }
 
 impl Stream for KrakenWebsocket {
-    type Item = Fallible<KrakenWsMessage>;
+    type Item = Result<KrakenWsMessage, KrakenError>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Option<Self::Item>> {
         let inner = Pin::new(&mut self.inner);
@@ -177,7 +176,7 @@ impl Stream for KrakenWebsocket {
     }
 }
 
-#[throws(failure::Error)]
+#[throws(KrakenError)]
 fn parse_message(msg: WSMessage) -> KrakenWsMessage {
     match msg {
         WSMessage::Text(message) => match message.as_str() {

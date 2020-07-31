@@ -1,7 +1,7 @@
-use failure::Error;
 use fehler::throws;
 use kraken_futures::rest::{KrakenRest, OrderbookRequest, TickersRequest};
 use tokio::runtime::Runtime;
+use KrakenError;
 
 #[test]
 #[throws(Error)]

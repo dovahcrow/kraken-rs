@@ -1,6 +1,7 @@
 mod common;
-pub mod errors;
+mod errors;
 pub mod rest;
 pub mod ws;
 
 pub use common::*;
+pub use errors::KrakenError;

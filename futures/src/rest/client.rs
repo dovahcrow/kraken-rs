@@ -46,7 +46,7 @@ impl KrakenRest {
         }
     }
 
-    pub async fn request_with_retry_nonce<R>(&self, req: R) -> failure::Fallible<R::Response>
+    pub async fn request_with_retry_nonce<R>(&self, req: R) -> Result<R::Response, KrakenError>
     where
         R: Request + Clone,
         R::Response: DeserializeOwned,
@@ -54,15 +54,13 @@ impl KrakenRest {
         loop {
             match self.request(req.clone()).await {
                 Ok(o) => return Ok(o),
-                Err(e) => match e.downcast_ref::<KrakenError>() {
-                    Some(KrakenError::KrakenError(content)) if content.starts_with("nonceDuplicate:") => continue,
-                    _ => throw!(e),
-                },
+                Err(KrakenError::KrakenError(content)) if content.starts_with("nonceDuplicate:") => continue,
+                Err(e) => throw!(e),
             };
         }
     }
 
-    #[throws(failure::Error)]
+    #[throws(KrakenError)]
     pub async fn request<R>(&self, req: R) -> R::Response
     where
         R: Request,
@@ -100,7 +98,7 @@ impl KrakenRest {
         self.handle_response(resp).await?
     }
 
-    #[throws(failure::Error)]
+    #[throws(KrakenError)]
     fn check_key(&self) -> (&str, &str) {
         match self.credential.as_ref() {
             None => throw!(KrakenError::NoApiKeySet),
@@ -108,7 +106,7 @@ impl KrakenRest {
         }
     }
 
-    #[throws(failure::Error)]
+    #[throws(KrakenError)]
     pub(crate) fn signature(&self, url: &Url, body: &str, nonce: i64) -> (&str, String) {
         let (key, secret) = self.check_key()?;
 
@@ -130,7 +128,7 @@ impl KrakenRest {
         (key, signature)
     }
 
-    async fn handle_response<T: DeserializeOwned>(&self, resp: Response) -> Result<T, failure::Error> {
+    async fn handle_response<T: DeserializeOwned>(&self, resp: Response) -> Result<T, KrakenError> {
         let resp = resp.text().await?;
 
         if let Ok(p) = from_str::<KrakenRestResponse<T>>(&resp) {

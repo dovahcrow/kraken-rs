@@ -2,7 +2,6 @@
 
 use dotenv::dotenv;
 use env_logger::init;
-use failure::Error;
 use fehler::throws;
 use futures::{SinkExt, StreamExt};
 use kraken_futures::rest::{KrakenRest, TickersRequest};
@@ -10,6 +9,7 @@ use kraken_futures::ws::{message, Command, KrakenWebsocket};
 use kraken_futures::Symbol;
 use serde_json::from_str;
 use structopt::StructOpt;
+use KrakenError;
 
 #[derive(Debug, StructOpt, Clone)]
 #[structopt(name = "kraken-rs", about = "kraken-rs.")]

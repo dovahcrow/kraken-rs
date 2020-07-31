@@ -10,7 +10,7 @@ pub use crate::errors::{DeribitError, Result};
 pub use crate::subscription_client::{DeribitSubscriptionClient, DeribitSubscriptionLimitedClient};
 
 use derive_builder::Builder;
-use failure::Error;
+use KrakenError;
 use fehler::throws;
 use futures::channel::{mpsc, oneshot};
 use futures::{select, FutureExt, SinkExt, Stream, StreamExt, TryStreamExt};

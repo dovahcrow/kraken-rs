@@ -1,4 +1,4 @@
-use crate::Symbol;
+use crate::{common::Symbol, errors::KrakenError};
 use fehler::{throw, throws};
 use serde::{ser, Serialize, Serializer};
 use serde_json::json;
@@ -35,7 +35,7 @@ impl Command {
         Self::Heartbeat
     }
 
-    #[throws(failure::Error)]
+    #[throws(KrakenError)]
     pub fn trade(product_ids: &[&str]) -> Self {
         Self::Trade {
             product_ids: product_ids.iter().map(|s| s.parse()).collect::<Result<Vec<_>, _>>()?,

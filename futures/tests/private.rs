@@ -1,4 +1,3 @@
-use failure::Error;
 use fehler::throws;
 use kraken_futures::{
     rest::{AccountsRequest, CancelAllOrdersRequest, CancelOrderRequest, KrakenRest, OpenPositionsRequest, SendOrderRequest},
@@ -6,6 +5,7 @@ use kraken_futures::{
 };
 use structopt::StructOpt;
 use tokio::runtime::Runtime;
+use KrakenError;
 
 #[derive(Debug, StructOpt, Clone)]
 #[structopt(name = "HoneyDeer", about = "The HoneyDeer.")]

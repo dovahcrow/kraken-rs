@@ -1,6 +1,6 @@
+use anyhow::Error;
 use dotenv::dotenv;
 use env_logger::init;
-use failure::Error;
 use kraken_futures::rest::{AccountsRequest, KrakenRest};
 use structopt::StructOpt;
 
@@ -20,7 +20,7 @@ async fn main() -> Result<(), Error> {
 
     let opt = Opt::from_args();
 
-    let client = KrakenRest::with_credential(None, &opt.kraken_api_key, &opt.kraken_api_secret);
+    let client = KrakenRest::with_credential(None, &opt.kraken_api_key, &"aa");
     let resp = client.request(AccountsRequest).await?;
     println!("{:?}", resp);
     Ok(())

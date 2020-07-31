@@ -70,8 +70,8 @@ impl Symbol {
 }
 
 impl FromStr for Symbol {
-    type Err = failure::Error;
-    #[throws(failure::Error)]
+    type Err = KrakenError;
+    #[throws(KrakenError)]
     fn from_str(s: &str) -> Symbol {
         from_str(&format!("\"{}\"", s))?
     }
@@ -152,8 +152,8 @@ impl std::fmt::Debug for Pair {
 }
 
 impl FromStr for Pair {
-    type Err = failure::Error;
-    #[throws(failure::Error)]
+    type Err = KrakenError;
+    #[throws(KrakenError)]
     fn from_str(s: &str) -> Pair {
         from_str(&format!("\"{}\"", s))?
     }

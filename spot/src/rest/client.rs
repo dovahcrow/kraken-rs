@@ -3,6 +3,7 @@ use crate::errors::{KrakenError, KrakenErrorResponse, KrakenResponse};
 use base64::{decode as b64decode, encode as b64encode};
 use chrono::Utc;
 use derive_builder::Builder;
+use failure::Error;
 use fehler::{throw, throws};
 use http::Method;
 use log::error;
@@ -60,7 +61,7 @@ impl Kraken {
         KrakenBuilder::default()
     }
 
-    #[throws(failure::Error)]
+    #[throws(Error)]
     pub async fn request<R>(&self, req: R) -> R::Response
     where
         R: Request,
@@ -97,7 +98,7 @@ impl Kraken {
         self.handle_response(resp).await?
     }
 
-    #[throws(failure::Error)]
+    #[throws(Error)]
     fn check_key(&self) -> (&str, &str) {
         match self.credential.as_ref() {
             None => throw!(KrakenError::NoApiKeySet),
@@ -105,29 +106,24 @@ impl Kraken {
         }
     }
 
-    #[throws(failure::Error)]
+    #[throws(Error)]
     pub(crate) fn signature(&self, url: &Url, body: &str, nonce: i64) -> (&str, String) {
         println!("input to signature: {}, {}", url.path(), body);
         let (key, secret) = self.check_key()?;
         // Signature: Message signature using HMAC-SHA512 of (URI path + SHA256(nonce + POST data)) and base64 decoded secret API key
         let encoded = format!("{}{}", nonce, body);
-        println!("encoded {}", encoded);
 
         let mut message = url.path().as_bytes().to_owned();
         message.extend(digest(&SHA256, encoded.as_bytes()).as_ref());
-
-        println!("message {}", show(&message));
 
         let signed_key = hmac::Key::new(hmac::HMAC_SHA512, &b64decode(secret)?);
         let signature = hmac::sign(&signed_key, &message);
         let signature = b64encode(&signature);
 
-        println!("Sig2 {}", signature);
-
         (key, signature)
     }
 
-    #[throws(failure::Error)]
+    #[throws(Error)]
     async fn handle_response<T: DeserializeOwned>(&self, resp: Response) -> T {
         let resp = resp.text().await?;
         if let Ok(p) = from_str::<KrakenResponse<T>>(&resp) {
