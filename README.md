@@ -1,6 +1,8 @@
 Kraken API Client for Rust Language
 =================
 
+This library is still in its very early stage. As for now, I only implemented all the APIs that is used by my trading bot. 
+
 ### Implementation status:
 
 Currently this library only implemented a part of the API for **Kraken Futures** (rest and websocket). But the plan is to also implement spot market API in this library.
